@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Open Speech Recording</title>	
+    <link href="static/styles/app.css" rel="stylesheet" type="text/css">
+  </head>
+  <script type="text/javascript">
+    var csrf_token = "{{ csrf_token() }}";
+  </script>
+  <body>
+
+    <div class="wrapper">
+
+      <header>
+        <h1>Open Speech Recording</h1>
+      </header>
+
+      <section class="top-display">
+	<div class="progress-display">
+	</div>
+	<div class="info-display">
+	  Once you're ready, press Record and then speak each word as it's shown.
+	</div>
+      </section>
+
+      <section class="main-controls">
+        <canvas class="visualizer"></canvas>
+        <div id="buttons">
+          <button class="record">Record</button>
+          <button class="stop">Stop</button>
+          <button class="upload">Upload</button>
+        </div>
+      </section>
+
+      <section class="sound-clips">
+
+        <!-- This is left here as a helper for testing the style of the clips
+        If you want to edit their appearance without having to record clips,
+        uncomment this and reload the page. Remember to comment it again when done!
+        <article class="clip">
+          <audio controls></audio>
+          <p>Sample clip name</p>
+          <button class="delete">Delete</button>
+        </article>
+        -->
+
+      </section>
+
+    </div>
+
+    <a href="https://github.com/petewarden/open_speech_recording">
+      <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png">
+    </a>
+
+    <script src="static/scripts/app.js"></script>
+
+  </body>
+</html>
