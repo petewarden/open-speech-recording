@@ -9,7 +9,7 @@ html, body {
 }
 
 body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: "Roboto Mono", monospace;
   font-size: 0.8rem;
 }
 
@@ -39,6 +39,12 @@ h1, h2 {
 .welcome-display {
   font-size: 1rem;
   text-align: center;
+  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+}
+
+.legal {
+  font-size: 0.75rem;
+  text-align: left;
   padding: 0.5rem 0.5rem 0.5rem 0.5rem;
 }
 
