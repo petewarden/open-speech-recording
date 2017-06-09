@@ -43,9 +43,10 @@ h1, h2 {
 }
 
 .legal {
-  font-size: 0.75rem;
+  font-size: 1.0rem;
   text-align: left;
   padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+  font-family: Arial;
 }
 
 canvas {
@@ -191,4 +192,22 @@ input[type=checkbox]:checked ~ aside {
     max-width: 700px;
     margin: 0 auto;
   }
+}
+
+footer {
+    font-family: Arial;
+    color: #222;
+    background-color: rgb(242, 242, 242);
+    width: 100%;
+    bottom: 0;
+    position: fixed;
+    padding-left: 30px;
+}
+
+footer a {
+  margin-left: 20px;
+}
+
+.info-display {
+  border-style: solid;
 }

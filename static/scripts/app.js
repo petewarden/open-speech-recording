@@ -14,6 +14,8 @@ var upload = document.querySelector('.upload');
 var soundClips = document.querySelector('.sound-clips');
 var canvas = document.querySelector('.visualizer');
 var mediaRecorder = null;
+var mediaStreamSource = null;
+var ignoreAutoPlay = false;
 
 // disable stop button while not recording
 
@@ -35,10 +37,10 @@ if (navigator.getUserMedia) {
 
   var onSuccess = function(stream) {
     mediaRecorder = new MediaRecorder(stream);
-
-    visualize(stream);
-
+    mediaStreamSource = audioCtx.createMediaStreamSource(stream);
     record.onclick = function() {
+      visualize(stream);
+
       // Display a countdown before recording starts.
       var progress = document.querySelector('.progress-display');
       progress.innerText = "3";
@@ -58,12 +60,16 @@ if (navigator.getUserMedia) {
     }
 
     stop.onclick = function() {
-      mediaRecorder.stop();
+      if (mediaRecorder.state == 'inactive') {
+        // The user has already pressed stop, so don't set up another word.
+        ignoreAutoPlay = true;
+      } else {
+        mediaRecorder.stop();
+      }
+      mediaStreamSource.disconnect();
       console.log(mediaRecorder.state);
-      console.log("recorder stopped");
       record.style.background = "";
-      record.style.color = "";
- 
+      record.style.color = ""; 
       stop.disabled = true;
       record.disabled = false;
     }
@@ -124,14 +130,12 @@ if (navigator.getUserMedia) {
 }
 
 function visualize(stream) {
-  var source = audioCtx.createMediaStreamSource(stream);
-
   var analyser = audioCtx.createAnalyser();
   analyser.fftSize = 2048;
   var bufferLength = analyser.frequencyBinCount;
   var dataArray = new Uint8Array(bufferLength);
 
-  source.connect(analyser);
+  mediaStreamSource.connect(analyser);
   
   WIDTH = canvas.width
   HEIGHT = canvas.height;
@@ -295,6 +299,10 @@ function updateProgress() {
 }
 
 function startRecording() {
+  if (ignoreAutoPlay) {
+    ignoreAutoPlay = false;
+    return;
+  }
   var word = getNextWord();
   if (word === null) {
     promptToSave();
@@ -310,6 +318,10 @@ function startRecording() {
 }
 
 function endRecording() {
+  if (mediaRecorder.state == 'inactive') {
+    // The user has already pressed stop, so don't set up another word.
+    return;
+  }
   mediaRecorder.stop();
   console.log(mediaRecorder.state);
   console.log("recorder stopped");
@@ -330,6 +342,7 @@ var allClips;
 var clipIndex;
 
 function saveRecordings() {
+  mediaStreamSource.disconnect();
   allClips = document.querySelectorAll('.clip');
   clipIndex = 0;
   uploadNextClip();
@@ -339,6 +352,7 @@ function uploadNextClip() {
   document.querySelector('.progress-display').innerText = 'Uploading clip ' + 
 	clipIndex + '/' + unrollWordCounts(getAllWantedWords()).length;
   var clip = allClips[clipIndex];
+  clip.style.display = 'None';
   var audioBlobUrl = clip.querySelector('audio').src;
   var word = clip.querySelector('p').innerText;
   var xhr = new XMLHttpRequest();
@@ -350,7 +364,6 @@ function uploadNextClip() {
       var ajaxRequest = new XMLHttpRequest();
       var uploadUrl = '/upload?word=' + word + '&_csrf_token=' + csrf_token;
       ajaxRequest.open('POST', uploadUrl, true);
-      ajaxRequest.setRequestHeader('Content-Type', 'application/json');    
       ajaxRequest.setRequestHeader('Content-Type', 'application/json');    
       ajaxRequest.onreadystatechange = function() {
         if (ajaxRequest.readyState == 4) {
