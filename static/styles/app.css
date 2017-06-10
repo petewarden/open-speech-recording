@@ -78,14 +78,18 @@ button {
   padding: 0.5rem;
 }
 
-button:hover, button:focus {
+button:hover:enabled, button:focus:enabled {
   box-shadow: inset 0px 0px 10px rgba(255, 255, 255, 1);
   background: #0ae;
 }
 
-button:active {
+button:active:enabled {
   box-shadow: inset 0px 0px 20px rgba(0,0,0,0.5);
   transform: translateY(2px);
+}
+
+button:disabled {
+  background: #888888;
 }
 
 .continue-link {
