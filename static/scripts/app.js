@@ -4,7 +4,7 @@ if (window.MediaRecorder) {
   console.log("MediaRecorder supported!");
 } else {
   console.error(
-    "MediaRecorder not supported, if your in macOS Safari (MediaRecorder for macOS Safari is in beta), you can enable Develop menu, then enable MediaRecorder in Develop > Experimental Features > MediaRecorder"
+    "MediaRecorder not supported, if your in macOS Safari, you can enable Develop menu, then enable MediaRecorder in Develop > Experimental Features > MediaRecorder"
   );
   console.log(
     "Enable Develop Menu, https://support.apple.com/guide/safari/use-the-developer-tools-in-the-develop-menu-sfri20948/mac"
@@ -39,99 +39,97 @@ upload.disabled = true;
 
 var audioCtx = new (window.AudioContext || webkitAudioContext)();
 var canvasCtx = canvas.getContext("2d");
-
-//main block for doing the audio recording
-var constraints = { audio: true };
 var chunks = [];
+let stream = null;
+async function getMedia(constraints) {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia(constraints);
+    mediaRecorder = new MediaRecorder(stream);
+    mediaStreamSource = audioCtx.createMediaStreamSource(stream);
+    record.onclick = function () {
+      visualize(stream);
 
-var onSuccess = function (stream) {
-  mediaRecorder = new MediaRecorder(stream);
-  mediaStreamSource = audioCtx.createMediaStreamSource(stream);
-  record.onclick = function () {
-    visualize(stream);
-
-    // Display a countdown before recording starts.
-    var progress = document.querySelector(".progress-display");
-    progress.innerText = "3";
-    document.querySelector(".info-display").innerText = "";
-    setTimeout(function () {
-      progress.innerText = "2";
+      // Display a countdown before recording starts.
+      var progress = document.querySelector(".progress-display");
+      progress.innerText = "3";
+      document.querySelector(".info-display").innerText = "";
       setTimeout(function () {
-        progress.innerText = "1";
+        progress.innerText = "2";
         setTimeout(function () {
-          progress.innerText = "";
-          startRecording();
+          progress.innerText = "1";
+          setTimeout(function () {
+            progress.innerText = "";
+            startRecording();
+          }, 1000);
         }, 1000);
       }, 1000);
-    }, 1000);
-    stop.disabled = false;
-    record.disabled = true;
-  };
-
-  stop.onclick = function () {
-    if (mediaRecorder.state == "inactive") {
-      // The user has already pressed stop, so don't set up another word.
-      ignoreAutoPlay = true;
-    } else {
-      mediaRecorder.stop();
-    }
-    mediaStreamSource.disconnect();
-    console.log(mediaRecorder.state);
-    record.style.background = "";
-    record.style.color = "";
-    stop.disabled = true;
-    record.disabled = false;
-  };
-
-  upload.onclick = function () {
-    saveRecordings();
-  };
-
-  mediaRecorder.onstop = function (e) {
-    console.log("data available after MediaRecorder.stop() called.");
-
-    var clipName = document.querySelector(".info-display").innerText;
-    var clipContainer = document.createElement("article");
-    var clipLabel = document.createElement("p");
-    var audio = document.createElement("audio");
-    var deleteButton = document.createElement("button");
-
-    clipContainer.classList.add("clip");
-    clipLabel.classList.add("clip-label");
-    audio.setAttribute("controls", "");
-    deleteButton.textContent = "Delete";
-    deleteButton.className = "delete";
-    clipLabel.textContent = clipName;
-
-    clipContainer.appendChild(audio);
-    clipContainer.appendChild(clipLabel);
-    clipContainer.appendChild(deleteButton);
-    soundClips.appendChild(clipContainer);
-
-    audio.controls = true;
-    var blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
-    chunks = [];
-    var audioURL = window.URL.createObjectURL(blob);
-    audio.src = audioURL;
-    console.log("recorder stopped");
-
-    deleteButton.onclick = function (e) {
-      evtTgt = e.target;
-      evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);
-      updateProgress();
+      stop.disabled = false;
+      record.disabled = true;
     };
-  };
 
-  mediaRecorder.ondataavailable = function (e) {
-    chunks.push(e.data);
-  };
-};
+    stop.onclick = function () {
+      if (mediaRecorder.state == "inactive") {
+        // The user has already pressed stop, so don't set up another word.
+        ignoreAutoPlay = true;
+      } else {
+        mediaRecorder.stop();
+      }
+      mediaStreamSource.disconnect();
+      console.log(mediaRecorder.state);
+      record.style.background = "";
+      record.style.color = "";
+      stop.disabled = true;
+      record.disabled = false;
+    };
 
-var onError = function (err) {
-  console.log("The following error occured: " + err);
-};
+    upload.onclick = function () {
+      saveRecordings();
+    };
 
-navigator.mediaDevices.getUserMedia(constraints, onSuccess, onError);
+    mediaRecorder.onstop = function (e) {
+      console.log("data available after MediaRecorder.stop() called.");
+
+      var clipName = document.querySelector(".info-display").innerText;
+      var clipContainer = document.createElement("article");
+      var clipLabel = document.createElement("p");
+      var audio = document.createElement("audio");
+      var deleteButton = document.createElement("button");
+
+      clipContainer.classList.add("clip");
+      clipLabel.classList.add("clip-label");
+      audio.setAttribute("controls", "");
+      deleteButton.textContent = "Delete";
+      deleteButton.className = "delete";
+      clipLabel.textContent = clipName;
+
+      clipContainer.appendChild(audio);
+      clipContainer.appendChild(clipLabel);
+      clipContainer.appendChild(deleteButton);
+      soundClips.appendChild(clipContainer);
+
+      audio.controls = true;
+      var blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
+      chunks = [];
+      var audioURL = window.URL.createObjectURL(blob);
+      audio.src = audioURL;
+      console.log("recorder stopped");
+
+      deleteButton.onclick = function (e) {
+        evtTgt = e.target;
+        evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);
+        updateProgress();
+      };
+    };
+
+    mediaRecorder.ondataavailable = function (e) {
+      chunks.push(e.data);
+    };
+  } catch (err) {
+    console.log("The following error occured: " + err);
+  }
+}
+//main block for doing the audio recording
+getMedia({ audio: true });
 
 function visualize(stream) {
   var analyser = audioCtx.createAnalyser();
