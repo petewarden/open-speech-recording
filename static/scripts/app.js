@@ -1,11 +1,3 @@
-// fork getUserMedia for multiple browser versions, for the future
-// when more browsers support MediaRecorder
-
-navigator.getUserMedia = ( navigator.getUserMedia ||
-                       navigator.webkitGetUserMedia ||
-                       navigator.mozGetUserMedia ||
-                       navigator.msGetUserMedia);
-
 // set up basic variables for app
 
 var record = document.querySelector('.record');
@@ -29,7 +21,7 @@ var canvasCtx = canvas.getContext("2d");
 
 //main block for doing the audio recording
 
-if (navigator.getUserMedia) {
+if (navigator.mediaDevices.getUserMedia) {
   console.log('getUserMedia supported.');
 
   var constraints = { audio: true };
@@ -122,9 +114,9 @@ if (navigator.getUserMedia) {
     console.log('The following error occured: ' + err);
   }
 
-  navigator.getUserMedia(constraints, onSuccess, onError);
+  navigator.mediaDevices.getUserMedia(constraints, onSuccess, onError);
 } else {
-  console.log('getUserMedia not supported on your browser!');
+  console.log('getUserMedia not supported on your browser! (IE has no support at all.)');
   document.querySelector('.info-display').innerText = 
 	'Your device does not support the HTML5 API needed to record audio (this is a known problem on iOS)';  
 }
